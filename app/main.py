@@ -1,7 +1,6 @@
 from fastapi import FastAPI
+from app.handlers import tasks
 
-app = FastAPI()
+app = FastAPI(title="Tracker API")
 
-@app.get("/")
-async def root():
-    return {"status": "ok"}
+app.include_router(tasks.router)
