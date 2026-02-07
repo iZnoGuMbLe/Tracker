@@ -1,0 +1,40 @@
+from datetime import date
+from app.repositories.task import TaskRepository
+from app.schemas.task_schema import TaskCreate, TaskUpdate, TaskResponse
+
+class TaskService:
+    def __init__(self, repository: TaskRepository):
+        self.repository = repository
+
+    async def create_task(self, task_data: TaskCreate) -> TaskResponse:
+        task = await self.repository.create(task_data)
+        return TaskResponse.model_validate(task)
+
+    async def get_task(self, task_id: int) -> TaskResponse | None:
+        task = await self.repository.get_task_by_id(task_id)
+        if not task:
+            return None
+        return TaskResponse.model_validate(task)
+
+    async def get_all_tasks(self) -> list[TaskResponse]:
+        tasks = await self.repository.get_tasks_list()
+        return [TaskResponse.model_validate(task) for task in tasks]
+
+    async def get_tasks_by_date(self, target_date: date) -> list[TaskResponse]:
+        tasks = await self.repository.get_task_by_date(target_date)
+        return [TaskResponse.model_validate(task) for task in tasks]
+
+    async def update_task(self, task_id: int, task_data: TaskUpdate) -> TaskResponse | None:
+        task = await self.repository.update(task_id, task_data)
+        if not task:
+            return None
+        return TaskResponse.model_validate(task)
+
+    async def delete_task(self, task_id: int) -> bool:
+        return await self.repository.delete(task_id)
+
+    async def mark_as_done(self, task_id: int) -> TaskResponse | None:
+        return await self.update_task(task_id, TaskUpdate(is_done=True))
+
+    async def mark_as_undone(self, task_id: int) -> TaskResponse | None:
+        return await self.update_task(task_id, TaskUpdate(is_done=False))
