@@ -8,24 +8,24 @@ class TaskRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, task_data: TaskCreate) -> TaskModel:
-        task = TaskModel(**task_data.model_dump())
+    async def create(self, task_data: TaskCreate, user_id: int) -> TaskModel:
+        task = TaskModel(**task_data.model_dump(), user_id=user_id)
         self.session.add(task)
         await self.session.commit()
         await self.session.refresh(task)
         return task
 
-    async def get_task_by_id(self, task_id: int) -> TaskModel | None:
+    async def get_task_by_id(self, task_id: int, user_id: int) -> TaskModel | None:
         result = await self.session.execute(
-            select(TaskModel).where(TaskModel.id == task_id)
+            select(TaskModel).where(TaskModel.id == task_id, TaskModel.user_id == user_id)
         )
         return result.scalar_one_or_none()
 
-    async def get_tasks_list(self) -> list[TaskModel]:
-        result = await self.session.execute(select(TaskModel))
+    async def get_tasks_list(self, user_id: int) -> list[TaskModel]:
+        result = await self.session.execute(select(TaskModel).where(TaskModel.user_id == user_id))
         return list(result.scalars().all())
 
-    async def get_task_by_date(self, target_date: date) -> list[TaskModel]:
+    async def get_task_by_date(self, target_date: date, user_id: int) -> list[TaskModel]:
         """Получить задачи, созданные в конкретный день"""
         start_of_day = datetime.combine(target_date, datetime.min.time())
         end_of_day = datetime.combine(target_date, datetime.max.time())
@@ -35,13 +35,13 @@ class TaskRepository:
                 and_(
                     TaskModel.created_at >= start_of_day,
                     TaskModel.created_at <= end_of_day
-                )
+                ), TaskModel.user_id ==user_id
             )
         )
         return list(result.scalars().all())
 
-    async def update(self, task_id: int, task_data: TaskUpdate) -> TaskModel | None:
-        task = await self.get_task_by_id(task_id)
+    async def update(self, task_id: int, task_data: TaskUpdate, user_id:int) -> TaskModel | None:
+        task = await self.get_task_by_id(task_id, user_id=user_id)
         if not task:
             return None
 
@@ -59,8 +59,8 @@ class TaskRepository:
         await self.session.refresh(task)
         return task
 
-    async def delete(self, task_id: int) -> bool:
-        task = await self.get_task_by_id(task_id)
+    async def delete(self, task_id: int, user_id: int) -> bool:
+        task = await self.get_task_by_id(task_id,user_id)
         if not task:
             return False
 

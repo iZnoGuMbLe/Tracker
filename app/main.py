@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.handlers import tasks
+from app.handlers import tasks,auth
+from app.models import UserModel,TaskModel
 
 app = FastAPI(title="Tracker API")
 
@@ -12,5 +13,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+app.include_router(auth.router)
 app.include_router(tasks.router)
