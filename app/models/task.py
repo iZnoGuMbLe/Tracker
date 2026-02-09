@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, String, Text, DateTime
+from sqlalchemy import Boolean, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
 from app.database.base import Base
@@ -32,6 +32,8 @@ class TaskModel(Base):
         DateTime(timezone=True),
         nullable=True
     )
+
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
 
 
 
