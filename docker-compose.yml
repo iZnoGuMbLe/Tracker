@@ -23,16 +23,21 @@ services:
     networks:
       - dev
 
-#  nginx:
-#    image: nginx:stable-alpine
-#    ports:
-#      - "80:80"
-#    volumes:
-#      - "./nginx.conf:/etc/nginx/nginx.conf"
-#    depends_on:
-#      - backend
-#    networks:
-#      - dev
+  nginx:
+    image: nginx:stable-alpine
+    container_name: tasktracker_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "./certbot/conf:/etc/letsencrypt:ro"
+      - "./certbot/www:/var/www/certbot:ro"
+    depends_on:
+      - backend
+    networks:
+      - dev
 
   backend:
     build:
@@ -40,8 +45,8 @@ services:
       dockerfile: Dockerfile
     container_name: tasktracker_backend
     restart: always
-    ports:
-      - "8000:8000"
+#    ports:
+#      - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/tracker
       DEBUG: "False"
