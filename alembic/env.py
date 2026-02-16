@@ -12,6 +12,9 @@ from app.models.task import TaskModel
 
 load_dotenv()
 
+from app.core.config import settings
+
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -32,6 +35,8 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+DATABASE_URL = settings.DATABASE_URL.replace("+asyncpg", "")
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -45,9 +50,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -65,7 +69,9 @@ def run_migrations_online() -> None:
 
     """
 
-    configuration = config.get_section(config.config_ini_section)
+    configuration = {
+        "sqlalchemy.url": DATABASE_URL,
+    }
     if configuration is None:
         raise RuntimeError("Alembic configuration is missing")
 
@@ -85,7 +91,7 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
 
-    print("Using database:", configuration["sqlalchemy.url"])
+    print("Using database:", DATABASE_URL)
 
 if context.is_offline_mode():
     run_migrations_offline()
