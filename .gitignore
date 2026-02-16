@@ -4,4 +4,4 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd__pycache__/
-
+echo "certbot/" >> .gitignore
