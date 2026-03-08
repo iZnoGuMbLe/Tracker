@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_DB: str
     DEBUG: bool
+    GRAFANA_USER: str
+    GRAFANA_PASSWORD: str
+    GRAFANA_ROOT_URL: str
 
     class Config:
         env_file = '.env'
