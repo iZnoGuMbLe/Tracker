@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     GRAFANA_USER: str
     GRAFANA_PASSWORD: str
     GRAFANA_ROOT_URL: str
+    REFRESH_TOKEN_EXPIRE_DAYS: int
 
     class Config:
         env_file = '.env'
