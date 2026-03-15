@@ -1,9 +1,10 @@
 from datetime import timedelta
 from fastapi import HTTPException, status
+from jose import JWTError
 
 from app.repositories.user import UserRepository
-from app.schemas.user_schema import UserLogin,UserCreate,UserResponse,JWTToken
-from app.core.security import verify_password, create_access_token
+from app.schemas.user_schema import UserLogin, UserCreate, UserResponse, JWTToken, TokenData
+from app.core.security import verify_password, create_access_token, create_refresh_token, decode_refresh_token
 from app.core.config import settings
 
 class AuthService:
@@ -51,8 +52,54 @@ class AuthService:
             data={"sub": str(user.id)},
             expires_delta=access_token_expires
         )
+        refresh_token = create_refresh_token(
+            data={'sub': str(user.id)}
+        )
 
-        return JWTToken(access_token=access_token)
+        return JWTToken(access_token=access_token,refresh_token=refresh_token)
+
+    async def refresh(self, refresh_token:str) -> JWTToken|None:
+        payload = decode_refresh_token(refresh_token)
+        if payload is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        user_id = int(payload['sub'])
+
+
+        user = await self.repository.get_user_by_id(user_id=user_id)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect user id",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User is not active"
+            )
+
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": str(user.id)},
+            expires_delta=access_token_expires
+        )
+        refresh_token = create_refresh_token(
+            data={'sub': str(user.id)}
+        )
+
+        return JWTToken(access_token=access_token,refresh_token=refresh_token)
+
+
+
+
+
 
 
 
