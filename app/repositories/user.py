@@ -38,3 +38,13 @@ class UserRepository:
         )
         return result.scalar_one_or_none()
 
+    async def verify_user(self,user_id: int) -> UserModel:
+        result = await self.session.execute(
+            select(UserModel).where(UserModel.id == user_id)
+        )
+        user = result.scalar_one_or_none()
+        if user:
+            user.is_verified=True
+            await self.session.commit()
+        return user
+

@@ -3,8 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 from app.handlers import tasks,auth
 from app.models import UserModel,TaskModel
+from app.broker.producer import producer
 
-app = FastAPI(title="Tracker API")
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    await producer.connect()
+    yield
+    await producer.close()
+
+app = FastAPI(title="Tracker API",lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,6 +38,6 @@ app.include_router(tasks.router)
 async def root():
     return {
         "message": "Tracker API",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "docs": "/docs"
     }
