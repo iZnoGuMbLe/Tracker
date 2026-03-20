@@ -42,3 +42,10 @@ async def refresh(
         service: AuthService = Depends(get_auth_service)
 ):
     return await service.refresh(request.refresh_token)
+
+@router.get("/verify-email",response_model=JWTToken)
+async def verify_user_email(
+        token: str,
+        service: AuthService = Depends(get_auth_service),
+):
+    return await service.verify_user(token)

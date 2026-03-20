@@ -163,10 +163,28 @@ services:
     networks:
       - dev
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: tasktracker_rabbitmq
+    restart: always
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - dev
+
+
+
+
+
+
 
 volumes:
   postgres_data:
   prometheus_data:
   grafana_data:
+  rabbitmq_data:
 
 
