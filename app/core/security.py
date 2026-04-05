@@ -90,5 +90,22 @@ def decode_verification_token(token:str) -> dict | None:
     except JWTError:
         return None
 
+def create_password_reset_token(data: dict)-> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(hours=settings.PASSWORD_RESET_TOKEN_EXPIRE_HRS)
+    to_encode.update({"exp": expire, "type": "password recover"})
+
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+def decode_password_reset_token(token:str) -> dict | None:
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "password recover":
+            return None
+        return payload
+    except JWTError:
+        return None
+
 
 

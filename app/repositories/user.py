@@ -48,3 +48,15 @@ class UserRepository:
             await self.session.commit()
         return user
 
+    async def update_password(self,user_id: int, new_hashed_user_password: str) -> UserModel:
+        result = await self.session.execute(
+            select(UserModel).where(UserModel.id == user_id)
+        )
+        user = result.scalar_one_or_none()
+
+        if user:
+            user.hashed_password=new_hashed_user_password
+            await self.session.commit()
+        return user
+
+
