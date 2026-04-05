@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
-from app.schemas.user_schema import UserCreate, UserLogin, UserResponse,JWTToken,RefreshTokenRequest
+from app.schemas.user_schema import UserCreate, UserLogin, UserResponse, JWTToken, RefreshTokenRequest, \
+    ResendVerificationRequest, ResendMessageResponse, ForgotPasswordRequest, ResetPasswordRequest
 from app.repositories.user import UserRepository
 from app.service.auth_service import AuthService
 from app.core.dependencies import get_current_user
@@ -49,3 +50,25 @@ async def verify_user_email(
         service: AuthService = Depends(get_auth_service),
 ):
     return await service.verify_user(token)
+
+@router.post("/resend-verification", response_model=ResendMessageResponse)
+async def resend_email_verif(
+        request: ResendVerificationRequest,
+        service: AuthService = Depends(get_auth_service),
+):
+    return await service.resend_verification(request.email)
+
+@router.post("/forgot-password",response_model=ResendMessageResponse)
+async def forgot_password(
+        request: ForgotPasswordRequest,
+        service: AuthService = Depends(get_auth_service)
+):
+    return await service.forgot_password(request.email)
+
+
+@router.post("/reset-password",response_model=ResendMessageResponse)
+async def reset_password(
+        request: ResetPasswordRequest,
+        service: AuthService = Depends(get_auth_service)
+):
+    return await service.reset_password(request.token, request.new_password)

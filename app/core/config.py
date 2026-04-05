@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     GRAFANA_ROOT_URL: str
     REFRESH_TOKEN_EXPIRE_DAYS: int
     VERIFICATION_TOKEN_EXPIRE_HRS: int
+    PASSWORD_RESET_TOKEN_EXPIRE_HRS:int
     AMQP_URL: str
 
     class Config:

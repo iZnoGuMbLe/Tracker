@@ -39,3 +39,16 @@ class RefreshTokenRequest(BaseModel):
 
 class TokenData(BaseModel):
     user_id: int | None = None
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
+
+class ResendMessageResponse(BaseModel):
+    message: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=6,max_length=120)
